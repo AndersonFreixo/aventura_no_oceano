@@ -16,19 +16,19 @@ class Engine:
 		self.lives = 3
 		self.level = 0
 		self.score = 0
-		self.imune = 0			#a counter that specifies immunity period
+		self.imune = 0		#a counter that specifies immunity period
 		self.background_num = 0 #active background id
 		self.state = "game"
 	
-		self.game_font = None # initialized in init_pygame method
-		self.screen = None    #
-		self.clock = None     #
+		self.game_font = None   # initialized in init_pygame method
+		self.screen = None      #
+		self.clock = None       #
 
 
 		self.init_pygame()
 		self.init_backgrounds()
 		self.gui = minigui.MiniGui()
-		self.gui.run()
+		self.init_buttons()
 		self.player = entity.Player((SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
 
 	def reset(self):
@@ -50,9 +50,15 @@ class Engine:
 		self.clock = pygame.time.Clock()
 		
 	def init_backgrounds(self):
-		"This method loads the background picture files into a list."
+		"""This method loads the background picture files into a list."""
 		for num in range(0, NUM_OF_BGS):
 			self.backgrounds.append(pygame.image.load("img/bg"+str(num+1)+".png").convert())
+
+	def init_buttons(self):
+		"""This method initializes the buttons used in all screens of the game"""
+		self.gui.create_button("init", "INICIAR", (100,30))
+		self.gui.create_button("exit", "SAIR", (100,30))
+		self.gui.create_button("back", "VOLTAR", (100,30))
 	
 	def run(self):
 		while True:
@@ -70,7 +76,6 @@ class Engine:
 		lives_txt = "Vidas: "+str(self.lives)
 		score_txt = "Pontos: "+str(self.score)
 		
-		#self.screen.blit(level_txt,(0, SCREEN_HEIGHT))
 		self.screen.blit(self.gui.get_text(level_txt),(0, SCREEN_HEIGHT))
 		self.screen.blit(self.gui.get_text(lives_txt),(100, SCREEN_HEIGHT))
 		self.screen.blit(self.gui.get_text(score_txt),(200, SCREEN_HEIGHT))
@@ -88,39 +93,31 @@ class Engine:
 
 		start_screen = pygame.image.load(START_SCREEN_IMG).convert_alpha()
 		
-		start_button= self.gui.get_button("INICIAR", (100,30), (100,180,255))
-		start_button_over = self.gui.get_button("INICIAR", (100,30), (0, 130, 255))
-		
-		exit_button = self.gui.get_button("SAIR", (100,30), (100,180,255))
-		exit_button_over = self.gui.get_button("SAIR", (100,30), (0, 130, 255))
 
 		start_button_position = 5, 400
 		exit_button_position = 5, 440	
-		
+
+		self.gui.put_button("init", start_button_position)
+		self.gui.put_button("exit", exit_button_position)
+	
 		while True:
-			start = start_button
-			exit_b = exit_button
-			
-			if Rect((start_button_position), start.get_size()).collidepoint(pygame.mouse.get_pos()):
-				start = start_button_over
-			if Rect((exit_button_position), exit_b.get_size()).collidepoint(pygame.mouse.get_pos()):
-				exit_b = exit_button_over
 
 			self.screen.fill((0,0,255))
 			self.screen.blit(start_screen, (0,0))
-			self.screen.blit(start,start_button_position)
-			self.screen.blit(exit_b,exit_button_position)
+
 			self.screen.blit(self.gui.get_text("Criado por Anderson S. Freixo"), (0, SCREEN_HEIGHT))
 			self.screen.blit(self.gui.get_text("anderson.freixo@gmail.com"), (0, SCREEN_HEIGHT+20))
 				
-
+			self.gui.run(self.screen)
 			for event in pygame.event.get():
 					if event.type == QUIT:
 						exit()
 					if event.type == MOUSEBUTTONDOWN:
-						if pygame.Rect((start_button_position), start.get_size()).collidepoint(pygame.mouse.get_pos()):
+						if self.gui.what_is_clicked() == "init":
+							self.gui.remove_button("init")
+							self.gui.remove_button("exit")
 							return
-						elif pygame.Rect((exit_button_position), exit_b.get_size()).collidepoint(pygame.mouse.get_pos()):
+						elif self.gui.what_is_clicked() == "exit":
 							exit()
 			pygame.display.update()
 			
@@ -132,12 +129,12 @@ class Engine:
 			if self.lives <= 0:
 				return
 			
-			if self.imune > 0: self.imune-=1 #When imune > 0 hero doesn't lose life points when touching an enemy.
-			if len(self.food) == 0: #Finished the level! Go to the next one!
+			if self.imune > 0: self.imune-=1      #When imune > 0 hero doesn't lose life points when touching an enemy.
+			if len(self.food) == 0:               #Finished the level! Go to the next one!
 				
 				self.reset_level()
 				self.imune = STD_FRAME_RATE 
-				if self.level !=0: #Each level adds 50pts to the score
+				if self.level !=0:            #Each level adds 50pts to the score
 					self.score+= 50
 					if self.level%2 == 0: #Adds 1 life for each 2 levels
 						self.lives+=1
@@ -186,32 +183,30 @@ class Engine:
 		score_surface = self.gui.get_text(score_txt)
 		go_screen = pygame.image.load(GAMEOVER_SCREEN_IMG).convert_alpha()
 	
-		back_button= self.gui.get_button("VOLTAR", (100,30), (100,180,255))
-		back_button_over = self.gui.get_button("VOLTAR", (100,30), (0, 130, 255))
-		
-		exit_button = self.gui.get_button("SAIR", (100,30), (100,180,255))
-		exit_button_over = self.gui.get_button("SAIR", (100,30), (0, 130, 255))
+		self.gui.put_button("back", back_button_position)
+		self.gui.put_button("exit", exit_button_position)
 		
 		while True:
-			back = back_button
-			exit_b = exit_button
-			if Rect((back_button_position), back_button.get_size()).collidepoint(pygame.mouse.get_pos()):
-				back = back_button_over
-			if Rect((exit_button_position), exit_button.get_size()).collidepoint(pygame.mouse.get_pos()):
-				exit_b = exit_button_over	
+				
 			self.screen.fill((0,0,255))
 			self.screen.blit(go_screen, (0,0))
 			self.screen.blit(score_surface,(0,0))
+			self.gui.run()					
 			self.screen.blit(back,back_button_position)
 			self.screen.blit(exit_b,exit_button_position)
 			
-
+	
 			for event in pygame.event.get():
 					if event.type == QUIT:
 						exit()
 					if event.type == MOUSEBUTTONDOWN:
-						if pygame.Rect((back_button_position), back_button.get_size()).collidepoint(pygame.mouse.get_pos()):
+
+
+						if self.gui.what_is_clicked() == "back":
+							self.gui.remove_button("back")
+							self.gui.remove_button("exit")
 							return
-						elif pygame.Rect((exit_button_position), exit_button.get_size()).collidepoint(pygame.mouse.get_pos()):
+						elif self.gui.what_is_clicked() == "exit":
 							exit()
+
 			pygame.display.update()

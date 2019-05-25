@@ -53,6 +53,8 @@ class Engine:
 	
 
 	def play_sound(self, name):
+		"""A wrapper method that calls self.sounds[name].play()"""
+
 		self.sounds[name].play()
 		
 	def init_pygame(self):

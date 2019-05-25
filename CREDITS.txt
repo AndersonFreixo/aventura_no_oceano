@@ -1,0 +1,27 @@
+CREDITS
+============================================================================================
+SOUNDS & MUSIC
+============================================================================================
+Game Over sound - Noirenex - https://freesound.org/people/noirenex/sounds/159408/
+
+Hurt sound - jalastram - https://freesound.org/people/jalastram/sounds/318237/
+
+Mouse over button sound - Leszek_Szary - https://freesound.org/people/Leszek_Szary/sounds/146720/
+
+Click sound - InspectorJ - https://freesound.org/people/InspectorJ/sounds/403012/
+
+Eating sound - PartnersinRhyme.com - aud_chomp.wav
+-------------------------------------------------------------------------------------------
+Soundtrack - https://www.partnersinrhyme.com/pir/free_music_loops.shtml
+
+ANTS2.wav
+Lets_Go_1.wav
+TWIST_c.wav
+CREEPY3.wav
+-------------------------------------------------------------------------------------------
+
+Note: I had to convert all original WAV files to OGG. I also cut some of the files.
+==========================================================================================
+IMAGES
+==========================================================================================
+All images were drawn by me using GIMP. Feel free to use them in your own projects!

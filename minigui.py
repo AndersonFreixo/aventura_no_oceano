@@ -1,4 +1,5 @@
 import pygame
+from time import sleep
 
 BUTTON_COLOR = 100, 180, 255        #Light blue
 OVER_BUTTON_COLOR =  0, 130, 255    #A darker blue
@@ -16,20 +17,38 @@ class MiniGui:
 		self.buttons = dict()
 		self.active = dict()
 		self.txt_font = pygame.font.Font(TXT_NAME, TXT_SIZE)
-		
+		self.last_over_button = False
 
-	def run(self, surface):
-		"""This method checks if the mouse is over the buttons and blits them."""
-	
-		for name, position in self.active.items():
-				
-			if Rect((position), self.buttons[name][0].get_size()).collidepoint(pygame.mouse.get_pos()):
+	def is_cursor_over_button(self, name):
+		return Rect((self.active[name]), self.buttons[name][0].get_size()).collidepoint(pygame.mouse.get_pos())
+
+
+	def check_cursor(self):
+		"""This method returns True if cursor has just been placed over a button and False otherwise"""
+		over_any_button = False
+
+		for name in self.active.keys():
 			
-				clicked = 1
-			else: clicked = 0
+			if self.is_cursor_over_button(name):
+				over_any_button = True
 
-			surface.blit(self.buttons[name][clicked], position)
-		
+		if over_any_button and not self.last_over_button:
+			self.last_over_button = True
+			return True
+
+		elif not over_any_button:
+			self.last_over_button = False
+		return False
+
+	def render(self, surface):
+		"""This method renders all active buttons."""
+
+		for name in self.active.keys():
+			
+			if self.is_cursor_over_button(name):
+				surface.blit(self.buttons[name][1], self.active[name])
+			else:
+				surface.blit(self.buttons[name][0], self.active[name])
 
 	def remove_button(self, name):
 		self.active.pop(name)

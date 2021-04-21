@@ -4,7 +4,7 @@ from ..common.constants import *
 def get_level(lvl):
 	"""Returns the entities from each level. Also defines the speed of the game, based on the level"""
 
-	speed = (lvl//MAX_ROUNDS)+2
+	speed = (lvl//MAX_LEVELS)+2
 	lvl%= 5
 	#print("Level ", lvl, "Speed", speed)
 

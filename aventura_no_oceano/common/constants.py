@@ -5,8 +5,8 @@ INFO_BOARD_HEIGHT = 40
 STD_FONT_SIZE = 25
 STD_FRAME_RATE = 60
 
-MAX_ROUNDS = 5
-NUM_OF_BGS = 4
+MAX_LEVELS = 5
+NUM_OF_ROUNDS = 4
 
 #Filenames
 KILLER_WHALE_IMG = "aventura_no_oceano/resources/img/orca.png"

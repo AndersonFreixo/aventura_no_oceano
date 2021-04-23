@@ -1,5 +1,5 @@
-from aventura_no_oceano import app_engine as engine
+from aventura_no_oceano import app
 
 if __name__ == "__main__":
-    engine = engine.Engine()
-    engine.run()
+    app = app.App()
+    app.run()

@@ -3,29 +3,44 @@ from ..common.constants import *
 
 class Entity:
 
-	def __init__(self, image_file_name, position):
+	def __init__(self, path, frames_num, position):
 		self.x, self.y = position
-		self.surface = pygame.image.load(image_file_name).convert_alpha()
+		self.framecounter = 0
+		self.frames_num = frames_num
+		self.surfaces = []
+		for n in range(frames_num):
+			self.surfaces.append(pygame.image.load(path+str(n)+".png").convert_alpha())
 
 	def get_position(self):
 		return self.x, self.y
 
 	def get_size(self):
-		return self.surface.get_width(), self.surface.get_height()
+		return self.surfaces[0].get_width(), self.surfaces[0].get_height()
 
 	def move(self):
 		pass
 
 	def render(self, screen):
-		screen.blit(self.surface, (self.x-self.surface.get_width()/2, self.y-self.surface.get_height()/2))
+		#framecounter is incremented by one in each iteration of game loop
+		#and goes back to 0 when framecounter == STD_FRAME_RATE
+		self.framecounter = (self.framecounter+1) % STD_FRAME_RATE
+
+		#all frames of the animation should run once per second
+		#so to check which animation frame must be rendered we should
+		#split the number of frames/seconds in a number of parts equal
+		#to movements.
+		frame = self.framecounter // (STD_FRAME_RATE // self.frames_num)
+
+		screen.blit(self.surfaces[frame], (self.x-self.surfaces[frame].get_width()/2,
+											self.y-self.surfaces[frame].get_height()/2))
 
 
 class Enemy(Entity):
-	def __init__(self, image_file_name, position, direction, speed):
+	def __init__(self, path, frames_num, position, direction, speed):
 		#Direction (x, y) x = -1 LEFT, 1 RIGHT y = -1 UP, 1 DOWN
 		self.horizontal_dir, self.vertical_dir = direction
 		self.speed = speed
-		super().__init__(image_file_name, position)
+		super().__init__(path, frames_num, position)
 
 	def is_touching(self, pos, entity_size):
 
@@ -33,14 +48,26 @@ class Enemy(Entity):
 
 
 	def render(self, screen):
-		if self.horizontal_dir <=0:
-			screen.blit(self.surface, (self.x-self.surface.get_width()/2, self.y-self.surface.get_height()/2))
-		else:
-			screen.blit(pygame.transform.flip(self.surface, True, False), (self.x-self.surface.get_width()/2, self.y-self.surface.get_height()/2))
+		#framecounter is incremented by one in each iteration of game loop
+		#and goes back to 0 when framecounter == STD_FRAME_RATE
+		self.framecounter = (self.framecounter+1) % STD_FRAME_RATE
+
+		#all frames of the animation should run once per second
+		#so to check which animation frame must be rendered we should
+		#split the number of frames/seconds in a number of parts equal
+		#to movements.
+		frame = self.framecounter // (STD_FRAME_RATE // self.frames_num)
+		surface = self.surfaces[frame]
+		if self.horizontal_dir > 0:
+			pygame.transform.flip(surface, True, False)
+
+		screen.blit(self.surfaces[frame], (self.x-self.surfaces[frame].get_width()/2,
+											self.y-self.surfaces[frame].get_height()/2))
+
 
 class KillerWhale(Enemy):
 	def __init__(self, position, direction, speed):
-		super().__init__(KILLER_WHALE_IMG, position,direction, speed)
+		super().__init__(KILLER_WHALE_IMG, 2, position,direction, speed)
 
 	def move(self):
 		"""The entity move function. This entity has a bouncing movement in all directions."""
@@ -64,7 +91,7 @@ class KillerWhale(Enemy):
 
 class ScubaDiver(Enemy):
 	def __init__(self, position, direction, speed):
-		super().__init__(SCUBA_DIVER_IMG, position,direction, speed)
+		super().__init__(SCUBA_DIVER_IMG, 1, position,direction, speed)
 
 	def move(self):
 		"""The entity's move function."""
@@ -80,7 +107,7 @@ class ScubaDiver(Enemy):
 
 class Narwal(Enemy):
 	def __init__(self, position, direction, speed):
-		super().__init__(NARWAL_IMG, position,direction, speed)
+		super().__init__(NARWAL_IMG, 1, position,direction, speed)
 
 	def move(self):
 		"""The entity move function. """
@@ -97,7 +124,7 @@ class Narwal(Enemy):
 
 class Player(Entity):
 	def __init__(self, position):
-		super().__init__(PLAYER_IMG, position)
+		super().__init__(PLAYER_IMG, 1, position)
 
 	def move(self, coord):
 		self.x = coord[0]
@@ -106,11 +133,11 @@ class Player(Entity):
 
 class Food(Entity):
 	def __init__(self, position):
-		super().__init__(KRILL_IMG, position)
+		super().__init__(KRILL_IMG, 1, position)
 
 	def is_covered(self, pos, entity_size):
 
 		return pygame.Rect((pos[0]-entity_size[0]//2,
 						   pos[1]-entity_size[1]//2),
-						   entity_size).contains(pygame.Rect((self.x-self.surface.get_width()//2,
-													 self.y-self.surface.get_height()//2), self.get_size()))
+						   entity_size).contains(pygame.Rect((self.x-self.surfaces[0].get_width()//2,
+													 self.y-self.surfaces[0].get_height()//2), self.get_size()))

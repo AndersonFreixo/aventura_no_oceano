@@ -9,11 +9,11 @@ MAX_LEVELS = 5
 NUM_OF_ROUNDS = 4
 
 #Filenames
-KILLER_WHALE_IMG = "aventura_no_oceano/resources/img/orca.png"
-SCUBA_DIVER_IMG = "aventura_no_oceano/resources/img/mergulhador.png"
-NARWAL_IMG = "aventura_no_oceano/resources/img/narwal.png"
-PLAYER_IMG = "aventura_no_oceano/resources/img/player2.png"
-KRILL_IMG = "aventura_no_oceano/resources/img/krill.png"
+KILLER_WHALE_IMG = "aventura_no_oceano/resources/img/orca/"
+SCUBA_DIVER_IMG = "aventura_no_oceano/resources/img/scubadiver/"
+NARWAL_IMG = "aventura_no_oceano/resources/img/narwal/"
+PLAYER_IMG = "aventura_no_oceano/resources/img/player/"
+KRILL_IMG = "aventura_no_oceano/resources/img/krill/"
 START_SCREEN_IMG = "aventura_no_oceano/resources/img/start_alpha.png"
 GAMEOVER_SCREEN_IMG = "aventura_no_oceano/resources/img/game_over.png"
 START_BUTTON_IMG = "aventura_no_oceano/resources/img/comecar_button.png"

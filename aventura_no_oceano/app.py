@@ -4,10 +4,10 @@ from pygame.locals import *
 from sys import exit
 from time import sleep
 
-from aventura_no_oceano.engine import minigui, music_player, sound_player
-from aventura_no_oceano.game import entity, state
-from aventura_no_oceano.data import levels
-from aventura_no_oceano.common.constants import *
+from engine import minigui, music_player, sound_player
+from game import entity, state
+from data import levels
+from common.constants import *
 
 
 class App:
@@ -19,6 +19,8 @@ class App:
         self.game_font = None   # initialized in init_pygame method
         self.screen = None      #
         self.clock = None       #
+
+        self.rank = list()
         self.music = music_player.MusicPlayer()
         self.sound = sound_player.SoundPlayer()
 
@@ -32,23 +34,31 @@ class App:
         self.player = entity.Player((SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
         self.state = state.State()
 
+    def load_ranking(self):
+        self.rank = list()
+        with open(RANK_TXT, "r") as file:
+            for line in file:
+                player, score = line.split(":")
+                score = int(score)
+                self.rank.append((player, score))
+
     def init_music(self):
         """Initialize the music player"""
-        soundtrack = ["aventura_no_oceano/resources/sound/st_01.ogg",
-                    "aventura_no_oceano/resources/sound/st_02.ogg",
-                    "aventura_no_oceano/resources/sound/st_03.ogg",
-                    "aventura_no_oceano/resources/sound/st_04.ogg"]
+        soundtrack = ["resources/sound/st_01.ogg",
+                    "resources/sound/st_02.ogg",
+                    "resources/sound/st_03.ogg",
+                    "resources/sound/st_04.ogg"]
 
         for s in soundtrack:
             self.music.add_track(s)
 
 
     def init_sounds(self):
-        self.sound.add("select", "aventura_no_oceano/resources/sound/select.ogg")
-        self.sound.add("click", "aventura_no_oceano/resources/sound/click-cut.ogg")
-        self.sound.add("eat",  "aventura_no_oceano/resources/sound/chomp-cut.ogg")
-        self.sound.add("hurt", "aventura_no_oceano/resources/sound/hurt.ogg")
-        self.sound.add("gameover", "aventura_no_oceano/resources/sound/game_over2.ogg")
+        self.sound.add("select", "resources/sound/select.ogg")
+        self.sound.add("click", "resources/sound/click-cut.ogg")
+        self.sound.add("eat",  "resources/sound/chomp-cut.ogg")
+        self.sound.add("hurt", "resources/sound/hurt.ogg")
+        self.sound.add("gameover", "resources/sound/game_over2.ogg")
 
 
     def init_pygame(self):
@@ -62,7 +72,7 @@ class App:
     def init_backgrounds(self):
         """This method loads the background picture files into a list."""
         for num in range(0, NUM_OF_ROUNDS):
-            self.backgrounds.append(pygame.image.load("aventura_no_oceano/resources/img/bg"+str(num+1)+".png").convert())
+            self.backgrounds.append(pygame.image.load("resources/img/bg"+str(num+1)+".png").convert())
 
     def init_buttons(self):
         """Initialize the buttons used in all screens of the game"""
@@ -164,6 +174,7 @@ class App:
             self.screen.blit(self.backgrounds[self.state.round],(0,0))
             pos = pygame.mouse.get_pos()
             self.player.move(pos)
+            
 
             for ent in self.state.entities:
                 #if enemy touches player
@@ -191,8 +202,14 @@ class App:
             pygame.display.update()
 
     def game_over(self):
-        """The Game Over screen"""
 
+        """The Game Over screen"""
+        
+        self.load_ranking()
+        if self.state.score > self.rank[0][1]:
+            print("Entroooou")
+        for l in self.rank:
+            print (l)
         pygame.mouse.set_visible(True)
         back_button_position = 5, 400
         exit_button_position = 5, 440
@@ -231,3 +248,9 @@ class App:
                         elif self.gui.what_is_clicked() == "exit":
                             exit()
             pygame.display.update()
+
+    def register_score(self):
+        pass
+if __name__ == "__main__":
+    app = App()
+    app.run()

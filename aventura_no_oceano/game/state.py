@@ -1,6 +1,6 @@
-from ..common.constants import *
-from ..data import levels
-from ..game import entity
+from common.constants import *
+from data import levels
+from game import entity
 import random
 
 class State:

@@ -1,5 +1,5 @@
 import pygame
-from ..common.constants import *
+from common.constants import *
 
 class Entity:
 
@@ -33,7 +33,7 @@ class Entity:
 
 		screen.blit(self.surfaces[frame], (self.x-self.surfaces[frame].get_width()/2,
 											self.y-self.surfaces[frame].get_height()/2))
-
+		
 
 class Enemy(Entity):
 	def __init__(self, path, frames_num, position, direction, speed):
@@ -59,9 +59,9 @@ class Enemy(Entity):
 		frame = self.framecounter // (STD_FRAME_RATE // self.frames_num)
 		surface = self.surfaces[frame]
 		if self.horizontal_dir > 0:
-			pygame.transform.flip(surface, True, False)
+			surface = pygame.transform.flip(surface, True, False)
 
-		screen.blit(self.surfaces[frame], (self.x-self.surfaces[frame].get_width()/2,
+		screen.blit(surface, (self.x-self.surfaces[frame].get_width()/2,
 											self.y-self.surfaces[frame].get_height()/2))
 
 
@@ -91,7 +91,7 @@ class KillerWhale(Enemy):
 
 class ScubaDiver(Enemy):
 	def __init__(self, position, direction, speed):
-		super().__init__(SCUBA_DIVER_IMG, 1, position,direction, speed)
+		super().__init__(SCUBA_DIVER_IMG, 4, position,direction, speed)
 
 	def move(self):
 		"""The entity's move function."""
@@ -124,7 +124,7 @@ class Narwal(Enemy):
 
 class Player(Entity):
 	def __init__(self, position):
-		super().__init__(PLAYER_IMG, 1, position)
+		super().__init__(PLAYER_IMG, 4, position)
 
 	def move(self, coord):
 		self.x = coord[0]

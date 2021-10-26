@@ -1,5 +1,5 @@
-from ..game import entity
-from ..common.constants import *
+from game import entity
+from common.constants import *
 
 def get_level(lvl):
 	"""Returns the entities from each level. Also defines the speed of the game, based on the level"""

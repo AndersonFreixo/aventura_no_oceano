@@ -73,16 +73,19 @@ class App:
         """This method loads the background picture files into a list."""
         for num in range(0, NUM_OF_ROUNDS):
             self.backgrounds.append(pygame.image.load("resources/img/bg"+str(num+1)+".png").convert())
-
+    
+    #TODO Change name to init_widgets
     def init_buttons(self):
         """Initialize the buttons used in all screens of the game"""
+        
         self.gui.create_button("init", "INICIAR", (100,30))
         self.gui.create_button("exit", "SAIR", (100,30))
         self.gui.create_button("back", "VOLTAR", (100,30))
-
+        self.gui.create_textbox("nickname", 120)
+        
     def run(self):
         """This function consists of a loop that calls the three game loops one afther another:
-            the initial screen loop, game loop and game over screen loop.
+            the initial screen loop, game loop and game over/highscore screen loop.
             If player doesn't quit the game after Game Over screen, state.reset() is called
             to reset game state."""
 
@@ -90,7 +93,21 @@ class App:
             self.state.reset()
             self.initial_screen()
             self.game_loop()
-            self.game_over()
+            self.load_ranking()
+
+            #If High scores table is full but current score is better than the worst
+            #high score on the table, than take out the last highscore and call highscore()
+            #loop to add the current one. 
+            if self.state.score > self.rank[0][1] and len(self.rank) == 10:
+                self.rank.pop(0)
+                self.highscore()
+            #If there is space in the high score table, than just call high score loop
+            #to add current one no matter its value
+            elif len(self.rank) < 10: 
+                self.highscore()
+         
+            else:
+                self.game_over()
 
 
     def render_board(self):
@@ -115,8 +132,8 @@ class App:
         start_button_position = 5, 400
         exit_button_position = 5, 440
 
-        self.gui.put_button("init", start_button_position)
-        self.gui.put_button("exit", exit_button_position)
+        self.gui.put_widget("init", start_button_position)
+        self.gui.put_widget("exit", exit_button_position)
 
         while True:
 
@@ -126,23 +143,22 @@ class App:
             self.screen.blit(self.gui.get_text("anderson.freixo@gmail.com"), (0, SCREEN_HEIGHT+20))
             self.gui.render(self.screen)
 
-            if self.gui.check_cursor():
-
-                self.sound.play("select")
-
-            for event in pygame.event.get():
-                    if event.type == QUIT:
-                        exit()
-                    if event.type == MOUSEBUTTONDOWN:
+            events = self.gui.process(pygame.event.get())
+            if events:
+                for event in events:
+                    type, name = event
+                    if type == "quit":
+                            exit()
+                    elif type == "cursor-over":
+                        self.sound.play("select")
+                    elif type == "clicked":
                         self.sound.play("click")
-
                         sleep(1)
-                        if self.gui.what_is_clicked() == "init":
-
-                            self.gui.remove_button("init")
-                            self.gui.remove_button("exit")
+                        if name == "init":
+                            self.gui.remove_widget("init")
+                            self.gui.remove_widget("exit")
                             return
-                        elif self.gui.what_is_clicked() == "exit":
+                        elif name == "exit":
                             exit()
             pygame.display.update()
 
@@ -200,26 +216,90 @@ class App:
             self.render_board()
 
             pygame.display.update()
+    def highscore(self):
+        
+        pygame.mouse.set_visible(True)
+        textbox_x = 5
+        textbox_y = SCREEN_HEIGHT 
+        nickname_text_position = textbox_x, textbox_y 
+
+        self.gui.put_widget("nickname", nickname_text_position) 
+        self.gui.set_focus("nickname")
+        score_msg_surface = self.gui.get_text("Você entrou para o ranking!")
+        instruct_msg_surface = self.gui.get_text("Digite seu nickname e aperte enter!")
+
+        go_screen = pygame.image.load(HIGHSCORE_SCREEN_IMG).convert_alpha()
+        
+        #High score table
+        board = pygame.Surface((160,180))
+        placed = False 
+        position = 0   #stores the position where to put the new high score
+
+        #The table is organized from lower to higher score, but its shown
+        #from higher to lower, so we must reverse it. If current score
+        #is higher than some score in the table, we add the new one 
+        #before it. 
+        count = 1
+        for hs in reversed(self.rank):
+            if hs[1] < self.state.score and placed == False:
+
+                txt_surf = self.gui.get_text(str(count) + "Você!"+ " " + str(self.state.score), (255, 0, 0))
+                board.blit(txt_surf, (0, 15 * count))
+                placed = True
+                position = len(self.rank)-(count-1)
+                count+=1 
+            txt_surf = self.gui.get_text(str(count)+" "+hs[0]+"  "+str(hs[1]))
+            board.blit(txt_surf, (0, 15 * count))
+            count+=1   
+        #case when score is the last one
+        if placed == False:
+            txt_surf = self.gui.get_text(str(count) + "Você!" + " " +str(self.state.score), (255, 0, 0))
+            board.blit(txt_surf, (0, 15 * count))
+
+        while True:
+
+            self.screen.fill((0,0,255))
+            self.screen.blit(go_screen, (0,0))
+            self.screen.blit(board, (5, 290))
+            self.screen.blit(score_msg_surface, (5, 260))
+            self.screen.blit(instruct_msg_surface, (5, 275))
+            self.gui.render(self.screen)
+
+            events = self.gui.process(pygame.event.get())
+            if events:
+
+                for event in events:
+                    type, name = event
+                    if type == "quit":
+                            exit()
+
+                    #Player submited nickname for high score
+                    elif type == "submit":
+                        self.rank.insert(position, (name, self.state.score))
+                        #Rewrite rank file with new score
+                        with open(RANK_TXT, "w") as file:
+                            for name, rank in self.rank: 
+                                file.write(name+":"+str(rank)+"\n")
+                        self.gui.remove_widget("nickname")
+                        return()
+            pygame.display.update()
+
 
     def game_over(self):
 
         """The Game Over screen"""
         
-        self.load_ranking()
-        if self.state.score > self.rank[0][1]:
-            print("Entroooou")
-        for l in self.rank:
-            print (l)
         pygame.mouse.set_visible(True)
         back_button_position = 5, 400
         exit_button_position = 5, 440
+        
+        self.gui.put_widget("back", back_button_position)
+        self.gui.put_widget("exit", exit_button_position)
 
         score_txt = "Score: "+str(self.state.score)
         score_surface = self.gui.get_text(score_txt)
+        
         go_screen = pygame.image.load(GAMEOVER_SCREEN_IMG).convert_alpha()
-
-        self.gui.put_button("back", back_button_position)
-        self.gui.put_button("exit", exit_button_position)
 
         while True:
 
@@ -228,29 +308,28 @@ class App:
             self.screen.blit(score_surface,(0,0))
             self.gui.render(self.screen)
 
+            events = self.gui.process(pygame.event.get())
+            if events:
 
-            if self.gui.check_cursor(): #mouse has just been placed over a button
-
-                self.sound.play("select")
-
-            for event in pygame.event.get():
-                    if event.type == QUIT:
-                        exit()
-                    if event.type == MOUSEBUTTONDOWN:
-                        self.sound.play("click")
-
-                        sleep(1)
-                        if self.gui.what_is_clicked() == "back":
-
-                            self.gui.remove_button("back")
-                            self.gui.remove_button("exit")
-                            return
-                        elif self.gui.what_is_clicked() == "exit":
+                for event in events:
+                    type, name = event
+                    if type == "quit":
                             exit()
+                    elif type == "cursor-over":
+                        self.sound.play("select")
+                    elif type == "clicked":
+                        self.sound.play("click")
+                        sleep(1)
+                        if name == "back":
+                            self.gui.remove_widget("back")
+                            self.gui.remove_widget("exit")
+                            return
+                        elif name == "exit":
+                            exit()
+
             pygame.display.update()
 
-    def register_score(self):
-        pass
+
 if __name__ == "__main__":
     app = App()
     app.run()

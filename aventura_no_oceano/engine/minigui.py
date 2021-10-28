@@ -54,6 +54,8 @@ class MiniGui:
                     if self.active[name].is_cursor_over == False:
                         self.active[name].is_cursor_over = True
                         events.append(("cursor-over", name))
+                    else:
+                        events.append(("cursor-still", name))
             else:
                 self.active[name].is_cursor_over = False
 

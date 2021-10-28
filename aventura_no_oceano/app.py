@@ -126,12 +126,14 @@ class App:
         """The game's starting screen"""
         start_screen = pygame.image.load(START_SCREEN_IMG).convert_alpha()
 
-        start_button_position = 5, 400
-        exit_button_position = 5, 440
+        start_button_pos = 5, 360
+        highscore_button_pos = 5, 400
+        exit_button_pos = 5, 440
 
-        self.gui.put_widget("init", start_button_position)
-        self.gui.put_widget("exit", exit_button_position)
-
+        self.gui.put_widget("init", start_button_pos)
+        self.gui.put_widget("exit", exit_button_pos)
+        self.gui.put_widget("highscore", highscore_button_pos)
+        
         while True:
 
             self.screen.fill((0,0,255))
@@ -148,12 +150,16 @@ class App:
                             exit()
                     elif type == "cursor-over":
                         self.sound.play("select")
+                    elif type == "cursor-still":
+                        if name == "highscore":
+                            self.screen.blit(self.assembly_hs_board(), (130, 300))
                     elif type == "clicked":
                         self.sound.play("click")
                         sleep(1)
                         if name == "init":
                             self.gui.remove_widget("init")
                             self.gui.remove_widget("exit")
+                            self.gui.remove_widget("highscore")
                             return
                         elif name == "exit":
                             exit()
@@ -220,15 +226,15 @@ class App:
         
         self.load_ranking()
         #High score table
-        board = pygame.Surface((160,180))
-
+        board = pygame.Surface((140,150))
+        board.fill((0, 30, 255))
         #The table is organized from lower to higher score, but its shown
         #from higher to lower, so we must reverse it. 
         count = 1
         for hs in reversed(self.rank):
             color = (255, 0, 0) if hs == highlight else (255, 255, 255)
             txt_surf = self.gui.get_text(str(count) + "  " + hs[0] + " " + str(hs[1]), color)
-            board.blit(txt_surf, (0, 15 * count))
+            board.blit(txt_surf, (0, 5+ 15 * (count-1)))
             count+=1 
         return board 
 

@@ -81,6 +81,7 @@ class App:
         self.gui.create_button("init", "INICIAR", (100,30))
         self.gui.create_button("exit", "SAIR", (100,30))
         self.gui.create_button("back", "VOLTAR", (100,30))
+        self.gui.create_button("highscore", "RANKING", (100, 30))
         self.gui.create_textbox("nickname", 120)
         
     def run(self):
@@ -93,19 +94,15 @@ class App:
             self.state.reset()
             self.initial_screen()
             self.game_loop()
+            
+            #Necessary to check if player made a high score
             self.load_ranking()
 
             #If High scores table is full but current score is better than the worst
-            #high score on the table, than take out the last highscore and call highscore()
-            #loop to add the current one. 
-            if self.state.score > self.rank[0][1] and len(self.rank) == 10:
-                self.rank.pop(0)
+            #high score on the table or if the high scores table is not full 
+            #go to high scores screen, otherwise go to game over screen. 
+            if len(self.rank) < 10 or self.state.score > self.rank[0][1]:
                 self.highscore()
-            #If there is space in the high score table, than just call high score loop
-            #to add current one no matter its value
-            elif len(self.rank) < 10: 
-                self.highscore()
-         
             else:
                 self.game_over()
 
@@ -118,9 +115,9 @@ class App:
         lives_txt = "Vidas: "+str(self.state.lives)
         score_txt = "Pontos: "+str(self.state.score)
 
-        self.screen.blit(self.gui.get_text(level_txt),(0, SCREEN_HEIGHT))
-        self.screen.blit(self.gui.get_text(lives_txt),(100, SCREEN_HEIGHT))
-        self.screen.blit(self.gui.get_text(score_txt),(200, SCREEN_HEIGHT))
+        self.screen.blit(self.gui.get_text(level_txt, size = "medium"),(0, SCREEN_HEIGHT))
+        self.screen.blit(self.gui.get_text(lives_txt, size = "medium"),(100, SCREEN_HEIGHT))
+        self.screen.blit(self.gui.get_text(score_txt, size = "medium"),(200, SCREEN_HEIGHT))
         if self.state.imune != 0:
             pygame.draw.line(self.screen, (255,0,0), (5, SCREEN_HEIGHT+STD_FONT_SIZE), (self.state.imune*3,SCREEN_HEIGHT+STD_FONT_SIZE), 3)
 
@@ -216,6 +213,25 @@ class App:
             self.render_board()
 
             pygame.display.update()
+    
+    def assembly_hs_board(self, highlight = None):
+        """Returns a surface with the assembled high score board. 
+        Optional parameter highlight indicates a score to be highlighted"""
+        
+        self.load_ranking()
+        #High score table
+        board = pygame.Surface((160,180))
+
+        #The table is organized from lower to higher score, but its shown
+        #from higher to lower, so we must reverse it. 
+        count = 1
+        for hs in reversed(self.rank):
+            color = (255, 0, 0) if hs == highlight else (255, 255, 255)
+            txt_surf = self.gui.get_text(str(count) + "  " + hs[0] + " " + str(hs[1]), color)
+            board.blit(txt_surf, (0, 15 * count))
+            count+=1 
+        return board 
+
     def highscore(self):
         
         pygame.mouse.set_visible(True)
@@ -228,41 +244,22 @@ class App:
         score_msg_surface = self.gui.get_text("Você entrou para o ranking!")
         instruct_msg_surface = self.gui.get_text("Digite seu nickname e aperte enter!")
 
-        go_screen = pygame.image.load(HIGHSCORE_SCREEN_IMG).convert_alpha()
-        
+        hs_screen = pygame.image.load(HIGHSCORE_SCREEN_IMG).convert_alpha()
+         
         #High score table
-        board = pygame.Surface((160,180))
-        placed = False 
         position = 0   #stores the position where to put the new high score
 
         #The table is organized from lower to higher score, but its shown
         #from higher to lower, so we must reverse it. If current score
         #is higher than some score in the table, we add the new one 
         #before it. 
-        count = 1
-        for hs in reversed(self.rank):
-            if hs[1] < self.state.score and placed == False:
-
-                txt_surf = self.gui.get_text(str(count) + "Você!"+ " " + str(self.state.score), (255, 0, 0))
-                board.blit(txt_surf, (0, 15 * count))
-                placed = True
-                position = len(self.rank)-(count-1)
-                count+=1 
-            txt_surf = self.gui.get_text(str(count)+" "+hs[0]+"  "+str(hs[1]))
-            board.blit(txt_surf, (0, 15 * count))
-            count+=1   
-        #case when score is the last one
-        if placed == False:
-            txt_surf = self.gui.get_text(str(count) + "Você!" + " " +str(self.state.score), (255, 0, 0))
-            board.blit(txt_surf, (0, 15 * count))
 
         while True:
 
             self.screen.fill((0,0,255))
-            self.screen.blit(go_screen, (0,0))
-            self.screen.blit(board, (5, 290))
-            self.screen.blit(score_msg_surface, (5, 260))
-            self.screen.blit(instruct_msg_surface, (5, 275))
+            self.screen.blit(hs_screen, (0,0))
+            self.screen.blit(score_msg_surface, (5, SCREEN_HEIGHT-30))
+            self.screen.blit(instruct_msg_surface, (5, SCREEN_HEIGHT-15))
             self.gui.render(self.screen)
 
             events = self.gui.process(pygame.event.get())
@@ -275,12 +272,22 @@ class App:
 
                     #Player submited nickname for high score
                     elif type == "submit":
-                        self.rank.insert(position, (name, self.state.score))
+                        if len(self.rank) >= 10:
+                            #The first score is the lowest one
+                            self.rank.pop(0)
+                        #Insert new score and sort list again
+                        self.rank.append((name, self.state.score))
+                        self.rank.sort(key = lambda row: row[1])
                         #Rewrite rank file with new score
                         with open(RANK_TXT, "w") as file:
-                            for name, rank in self.rank: 
-                                file.write(name+":"+str(rank)+"\n")
+                            for player, rank in self.rank: 
+                                file.write(player+":"+str(rank)+"\n")
                         self.gui.remove_widget("nickname")
+                        
+                        self.screen.blit(self.assembly_hs_board((name, self.state.score)), (5, SCREEN_HEIGHT - 220))
+
+                        pygame.display.update()
+                        sleep(3)
                         return()
             pygame.display.update()
 

@@ -5,9 +5,10 @@ BUTTON_COLOR = 100, 180, 255        #Light blue
 OVER_BUTTON_COLOR =  0, 130, 255    #A darker blue
 TXT_COLOR = 255,255,255             #White
 
-TXT_SIZE = 25
-TXT_FONT = None
-TXT_NAME = None
+SMALL_TXT_SIZE = 10
+MEDIUM_TXT_SIZE = 12
+BIG_TXT_SIZE = 18
+HUGE_TXT_SIZE = 25
 
 from pygame.locals import *
 
@@ -26,7 +27,12 @@ class MiniGui:
         #Widgets implemented so far: button, text
         self.widgets = dict() 
         self.active = dict()
-        self.txt_font = pygame.font.Font(TXT_NAME, TXT_SIZE)
+        self.fonts = dict()
+
+        self.fonts["small"] = pygame.font.Font(open("resources/font/zig.ttf"), SMALL_TXT_SIZE)
+        self.fonts["medium"] = pygame.font.Font(open("resources/font/zig.ttf"), MEDIUM_TXT_SIZE)
+        self.fonts["big"] = pygame.font.Font(open("resources/font/zig.ttf"), BIG_TXT_SIZE)
+        self.fonts["huge"] = pygame.font.Font(open("resources/font/zig.ttf"), HUGE_TXT_SIZE)
         self.active_textboxes = dict()
 
     def is_cursor_over_widget(self, name):
@@ -103,7 +109,7 @@ class MiniGui:
                     surface.blit(widget.normal_surface, widget.position)
             if widget.type == "textbox":
                     surface.blit(widget.normal_surface, widget.position)
-                    text_surface = self.get_text(widget.text, color = (0,0,0))
+                    text_surface = self.get_text(widget.text, color = (0,0,0), size = "big")
                     surface.blit(text_surface, widget.position)
 
     def remove_widget(self, name):
@@ -133,7 +139,7 @@ class MiniGui:
         button.fill(BUTTON_COLOR)
         button_over.fill(OVER_BUTTON_COLOR)
 
-        text = self.get_text(text_str, TXT_COLOR)
+        text = self.get_text(text_str, TXT_COLOR, "medium")
         text_size = text.get_size()
 
         button.blit(text, ((size[0]-text_size[0])/2, (size[1]-text_size[1])/2))
@@ -152,9 +158,9 @@ class MiniGui:
         self.active[name].position = position
 
 
-    def get_text(self, text_str, color = TXT_COLOR):
+    def get_text(self, text_str, color = TXT_COLOR, size = "small"):
 
-        return self.txt_font.render(text_str, 1, color)
+        return self.fonts[size].render(text_str, 1, color)
     
     def get_widget(self, name):
 

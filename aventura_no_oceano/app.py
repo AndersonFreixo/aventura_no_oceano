@@ -44,22 +44,22 @@ class App:
 
     def init_music(self):
         """Initialize the music player"""
-        soundtrack = ["resources/sound/st_01.ogg",
-                    "resources/sound/st_02.ogg",
-                    "resources/sound/st_03.ogg",
-                    "resources/sound/st_04.ogg"]
+        soundtrack = [SOUNDTRACK_01,
+                    SOUNDTRACK_02,
+                    SOUNDTRACK_03,
+                    SOUNDTRACK_04]
 
         for s in soundtrack:
             self.music.add_track(s)
 
 
     def init_sounds(self):
-        self.sound.add("select", "resources/sound/select.ogg")
-        self.sound.add("click", "resources/sound/click-cut.ogg")
-        self.sound.add("eat",  "resources/sound/chomp-cut.ogg")
-        self.sound.add("hurt", "resources/sound/hurt.ogg")
-        self.sound.add("gameover", "resources/sound/game_over2.ogg")
-
+        self.sound.add("select", SOUND_SELECT)
+        self.sound.add("click", SOUND_CLICK)
+        self.sound.add("eat",  SOUND_EAT)
+        self.sound.add("hurt", SOUND_HURT)
+        self.sound.add("gameover", SOUND_GAME_OVER)
+        self.sound.add("triumph", SOUND_TRIUMPH)
 
     def init_pygame(self):
         """This method initializes Pygame, the game font, screen and clock and configures some other stuff."""
@@ -72,7 +72,7 @@ class App:
     def init_backgrounds(self):
         """This method loads the background picture files into a list."""
         for num in range(0, NUM_OF_ROUNDS):
-            self.backgrounds.append(pygame.image.load("resources/img/bg"+str(num+1)+".png").convert())
+            self.backgrounds.append(pygame.image.load(IMAGE_PATH+"bg"+str(num+1)+".png").convert())
     
     #TODO Change name to init_widgets
     def init_buttons(self):
@@ -175,7 +175,6 @@ class App:
         while True:
             self.clock.tick(STD_FRAME_RATE)
             if self.state.lives <= 0:
-                self.sound.play("gameover")
                 self.music.stop()
                 return
 
@@ -239,7 +238,7 @@ class App:
         return board 
 
     def highscore(self):
-        
+        self.sound.play("triumph") 
         pygame.mouse.set_visible(True)
         textbox_x = 5
         textbox_y = SCREEN_HEIGHT 
@@ -247,6 +246,7 @@ class App:
 
         self.gui.put_widget("nickname", nickname_text_position) 
         self.gui.set_focus("nickname")
+        score_num_surface = self.gui.get_text("SCORE: "+str(self.state.score), size = "huge")
         score_msg_surface = self.gui.get_text("Você entrou para o ranking!")
         instruct_msg_surface = self.gui.get_text("Digite seu nickname e aperte enter!")
 
@@ -264,6 +264,7 @@ class App:
 
             self.screen.fill((0,0,255))
             self.screen.blit(hs_screen, (0,0))
+            self.screen.blit(score_num_surface, (5, SCREEN_HEIGHT-55))
             self.screen.blit(score_msg_surface, (5, SCREEN_HEIGHT-30))
             self.screen.blit(instruct_msg_surface, (5, SCREEN_HEIGHT-15))
             self.gui.render(self.screen)
@@ -301,7 +302,8 @@ class App:
     def game_over(self):
 
         """The Game Over screen"""
-        
+         
+        self.sound.play("gameover")
         pygame.mouse.set_visible(True)
         back_button_position = 5, 400
         exit_button_position = 5, 440

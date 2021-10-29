@@ -9,6 +9,9 @@ MAX_LEVELS = 5
 NUM_OF_ROUNDS = 4
 
 #Filenames
+
+#Images
+IMAGE_PATH = "resources/img/"
 KILLER_WHALE_IMG = "resources/img/orca/"
 SCUBA_DIVER_IMG = "resources/img/scubadiver/"
 NARWAL_IMG = "resources/img/narwal/"
@@ -20,4 +23,20 @@ HIGHSCORE_SCREEN_IMG = "resources/img/highscore.png"
 START_BUTTON_IMG = "resources/img/comecar_button.png"
 EXIT_BUTTON_IMG = "resources/img/sair_button.png"
 BACK_BUTTON_IMG = "resources/img/back_button.png"
+
+#Soundtrack
+SOUNDTRACK_01 = "resources/sound/st_01.ogg"
+SOUNDTRACK_02 = "resources/sound/st_02.ogg"
+SOUNDTRACK_03 = "resources/sound/st_03.ogg"
+SOUNDTRACK_04 = "resources/sound/st_04.ogg"
+
+#Data
 RANK_TXT = "data/ranking.dat"
+
+#Sounds
+SOUND_SELECT = "resources/sound/select.ogg"
+SOUND_CLICK = "resources/sound/click-cut.ogg"
+SOUND_EAT = "resources/sound/chomp-cut.ogg"
+SOUND_HURT =  "resources/sound/hurt.ogg"
+SOUND_GAME_OVER = "resources/sound/game_over2.ogg"
+SOUND_TRIUMPH = "resources/sound/triumph.ogg"

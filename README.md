@@ -1,7 +1,11 @@
 # aventura_no_oceano
 A simple game using Python and Pygame. The mechanics of the game is inspired by an old game called Jewel Thief. 
 
-An example match can be seen <a href ="https://www.youtube.com/shorts/6J8PWccataE">here</a>.
+An example match:
+
+
+https://github.com/user-attachments/assets/7883b9b0-6906-4275-bb62-3028df586111
+
 
 This is my first complete game developed in Python. Currently being refactored.
 
